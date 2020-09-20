@@ -8,7 +8,7 @@ tfplan  ?= terraform.tfplan
 lambda  ?= grant
 
 account ?= ${path}/account.json
-region  ?= us-west2
+region  ?= us-central1
 project ?= ...
 bucket  ?= grant-oauth
 

@@ -1,6 +1,6 @@
 
 var grant = require('grant').gcloud({
-  config: require('./config.json'), session: {secret: 'grant'}
+  config: require('./config.json'), session: {name: '__session', secret: 'grant'}
 })
 
 exports.handler = async (req, res) => {

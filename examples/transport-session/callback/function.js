@@ -1,6 +1,6 @@
 
 var Session = require('grant/lib/session')({
-  secret: 'grant', store: require('./store')
+  name: '__session', secret: 'grant', store: require('./store')
 })
 
 exports.handler = async (req, res) => {

@@ -5,7 +5,7 @@
 
 ```js
 var grant = require('grant').gcloud({
-  config: {/*configuration - see below*/}, session: {secret: 'grant'}
+  config: {/*configuration - see below*/}, session: {name: '__session', secret: 'grant'}
 })
 
 exports.handler = async (req, res) => {
@@ -26,15 +26,59 @@ exports.handler = async (req, res) => {
 
 The `config` key expects your [**Grant** configuration][grant-config].
 
-#### Lambda Prefix
+## Routes
 
-You have to specify the absolute path `prefix` that includes your lambda name:
+Grant relies on the request path to determine the provider name and any static override being used.
+
+Additionally the `prefix` specified in your Grant configuration, that defaults to `/connect`, is used to generate the correct `redirect_uri` in case it is not configured explicitly.
+
+### Default Domain
+
+```
+https://[REGION]-[PROJECT].cloudfunctions.net/[LAMBDA]/connect/google
+https://[REGION]-[PROJECT].cloudfunctions.net/[LAMBDA]/connect/google/callback
+```
+
+You have to specify the `redirect_uri` explicitly because the actual request URL contains the lambda name in the path, but that is never sent to your lambda handler:
 
 ```json
 {
   "defaults": {
-    "origin": "https://[REGION]-[PROJECT].cloudfunctions.net",
-    "prefix": "/[lambda]/connect"
+    "origin": "https://[REGION]-[PROJECT].cloudfunctions.net"
+  },
+  "google": {
+    "redirect_uri": "https://[REGION]-[PROJECT].cloudfunctions.net/[LAMBDA]/connect/google/callback"
+  }
+}
+```
+
+### Firebase Hosting
+
+In case you have the following `rewrites` configuration that proxy all requests to your `grant` handler:
+
+```json
+{
+  "hosting": {
+    ...
+    "rewrites": [
+      {
+        "source": "**",
+        "function": "grant"
+      }
+    ]
+  }
+}
+```
+
+```
+https://[PROJECT].firebaseapp.com/connect/google
+https://[PROJECT].firebaseapp.com/connect/google/callback
+```
+
+```json
+{
+  "defaults": {
+    "origin": "https://[PROJECT].firebaseapp.com"
   },
   "google": {}
 }
@@ -42,21 +86,9 @@ You have to specify the absolute path `prefix` that includes your lambda name:
 
 ---
 
-## Routes
+## Local Routes
 
-You login by navigating to:
-
-```
-https://[REGION]-[PROJECT].cloudfunctions.net/[LAMBDA]/connect/google
-```
-
-The redirect URL of your OAuth app have to be set to:
-
-```
-https://[REGION]-[PROJECT].cloudfunctions.net/[LAMBDA]/connect/google/callback
-```
-
-And locally:
+When running locally the following routes can be used:
 
 ```
 http://localhost:3000/connect/google
@@ -71,7 +103,7 @@ The `session` key expects your session configuration:
 
 Option | Description
 :- | :-
-`name` | Cookie name, defaults to `grant`
+`name` | Cookie name, defaults to `grant`, **it have to be set to `__session` for Firebase Hosting!**
 `secret` | Cookie secret, **required**
 `cookie` | [cookie] options, defaults to `{path: '/', httpOnly: true, secure: false, maxAge: null}`
 `store` | External session store implementation

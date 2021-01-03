@@ -12,6 +12,6 @@
   },
   "main": "./function.js",
   "dependencies": {
-    "grant": "^5.4.3"
+    "grant": "^5.4.9"
   }
 }
